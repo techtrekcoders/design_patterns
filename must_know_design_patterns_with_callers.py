@@ -1,19 +1,31 @@
 """
-MUST-KNOW DESIGN PATTERNS – SIMPLE INTERVIEW EXAMPLES (WITH CALLERS)
+MUST-KNOW DESIGN PATTERNS – SIMPLE INTERVIEW EXAMPLES (WITH NOTES)
 
-Each pattern includes:
-✔ Minimal classes
-✔ Immediate caller/demo
-✔ Easy to test & explain
+HOW TO USE THIS FILE:
+- Each pattern has:
+  1) Small classes
+  2) Clear comments (WHY this class exists)
+  3) Immediate caller/demo
+- Read comments + run code = interview ready
 """
 
 # =========================================================
 # 1️⃣ SINGLETON
 # =========================================================
 class Logger:
+    """
+    Singleton class.
+    WHY:
+        Logging should be centralized.
+        Multiple instances = inconsistent logs.
+
+    INTERVIEW LINE:
+        "Singleton ensures only one instance per process."
+    """
     _instance = None
 
     def __new__(cls):
+        # Control object creation
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
@@ -34,21 +46,37 @@ print("Same instance:", logger1 is logger2)
 # 2️⃣ FACTORY METHOD
 # =========================================================
 class Notification:
+    """
+    Product interface.
+    WHY:
+        Client should depend on interface, not concrete classes.
+    """
     def send(self, msg):
         pass
 
 
 class Email(Notification):
+    """Concrete product: Email notification"""
     def send(self, msg):
         print("Email:", msg)
 
 
 class SMS(Notification):
+    """Concrete product: SMS notification"""
     def send(self, msg):
         print("SMS:", msg)
 
 
 class NotificationFactory:
+    """
+    Factory Method.
+    WHY:
+        Centralize object creation.
+        Avoid if-else scattered across code.
+
+    INTERVIEW LINE:
+        "Factory encapsulates object creation logic."
+    """
     @staticmethod
     def create(channel):
         if channel == "email":
@@ -60,34 +88,42 @@ class NotificationFactory:
 
 # --- Caller ---
 print("\n--- Factory Method Demo ---")
-notifier = NotificationFactory.create("email")
-notifier.send("Hello User")
+NotificationFactory.create("email").send("Hello User")
 
 
 # =========================================================
 # 3️⃣ ABSTRACT FACTORY
 # =========================================================
 class PaymentGateway:
+    """Abstract product: Payment"""
     def pay(self, amount):
         pass
 
 
 class InvoiceService:
+    """Abstract product: Invoice"""
     def generate(self):
         pass
 
 
 class StripePayment(PaymentGateway):
+    """Concrete product (Stripe family)"""
     def pay(self, amount):
         print(f"Stripe payment: {amount}")
 
 
 class StripeInvoice(InvoiceService):
+    """Concrete product (Stripe family)"""
     def generate(self):
         print("Stripe invoice generated")
 
 
 class PaymentFactory:
+    """
+    Abstract Factory.
+    WHY:
+        Create families of related objects.
+    """
     def create_payment(self):
         pass
 
@@ -96,6 +132,11 @@ class PaymentFactory:
 
 
 class StripeFactory(PaymentFactory):
+    """
+    Concrete Factory.
+    INTERVIEW LINE:
+        "Abstract Factory creates families of related objects."
+    """
     def create_payment(self):
         return StripePayment()
 
@@ -114,6 +155,11 @@ factory.create_invoice().generate()
 # 4️⃣ BUILDER
 # =========================================================
 class User:
+    """
+    Complex object.
+    WHY:
+        Many optional fields.
+    """
     def __init__(self, name, age=None, email=None):
         self.name = name
         self.age = age
@@ -124,6 +170,15 @@ class User:
 
 
 class UserBuilder:
+    """
+    Builder.
+    WHY:
+        Avoid large constructors.
+        Build object step-by-step.
+
+    INTERVIEW LINE:
+        "Builder helps construct complex objects cleanly."
+    """
     def __init__(self, name):
         self.name = name
         self.age = None
@@ -143,19 +198,31 @@ class UserBuilder:
 
 # --- Caller ---
 print("\n--- Builder Demo ---")
-user = UserBuilder("Krishna").with_age(30).with_email("k@mail.com").build()
-print(user)
+print(UserBuilder("Krishna").with_age(30).with_email("k@mail.com").build())
 
 
 # =========================================================
 # 5️⃣ ADAPTER
 # =========================================================
 class OldPaymentSystem:
+    """
+    Legacy system.
+    PROBLEM:
+        Interface doesn't match new system.
+    """
     def make_payment(self, amount):
         print(f"Old payment processed: {amount}")
 
 
 class PaymentAdapter:
+    """
+    Adapter.
+    WHY:
+        Make incompatible interfaces work together.
+
+    INTERVIEW LINE:
+        "Adapter converts one interface into another."
+    """
     def __init__(self, old_system):
         self.old_system = old_system
 
@@ -165,19 +232,27 @@ class PaymentAdapter:
 
 # --- Caller ---
 print("\n--- Adapter Demo ---")
-adapter = PaymentAdapter(OldPaymentSystem())
-adapter.pay(500)
+PaymentAdapter(OldPaymentSystem()).pay(500)
 
 
 # =========================================================
 # 6️⃣ DECORATOR
 # =========================================================
 class Service:
+    """Core service"""
     def execute(self):
         print("Executing service")
 
 
 class LoggingDecorator:
+    """
+    Decorator.
+    WHY:
+        Add behavior without modifying original class.
+
+    INTERVIEW LINE:
+        "Decorator adds behavior dynamically."
+    """
     def __init__(self, service):
         self.service = service
 
@@ -188,8 +263,7 @@ class LoggingDecorator:
 
 # --- Caller ---
 print("\n--- Decorator Demo ---")
-service = LoggingDecorator(Service())
-service.execute()
+LoggingDecorator(Service()).execute()
 
 
 # =========================================================
@@ -206,6 +280,14 @@ class PaymentService:
 
 
 class OrderFacade:
+    """
+    Facade.
+    WHY:
+        Provide simple interface to complex subsystems.
+
+    INTERVIEW LINE:
+        "Facade hides system complexity."
+    """
     def complete_order(self):
         OrderService().place_order()
         PaymentService().pay()
@@ -220,6 +302,7 @@ OrderFacade().complete_order()
 # 8️⃣ STRATEGY
 # =========================================================
 class PaymentStrategy:
+    """Strategy interface"""
     def pay(self, amount):
         pass
 
@@ -235,6 +318,14 @@ class UpiPayment(PaymentStrategy):
 
 
 class PaymentContext:
+    """
+    Context.
+    WHY:
+        Switch algorithms at runtime.
+
+    INTERVIEW LINE:
+        "Strategy avoids if-else logic."
+    """
     def __init__(self, strategy):
         self.strategy = strategy
 
@@ -244,14 +335,18 @@ class PaymentContext:
 
 # --- Caller ---
 print("\n--- Strategy Demo ---")
-context = PaymentContext(UpiPayment())
-context.pay(200)
+PaymentContext(UpiPayment()).pay(200)
 
 
 # =========================================================
 # 9️⃣ OBSERVER
 # =========================================================
 class UserService:
+    """
+    Subject.
+    WHY:
+        Notify multiple listeners on event.
+    """
     def __init__(self):
         self.observers = []
 
@@ -265,21 +360,31 @@ class UserService:
 
 
 class EmailObserver:
+    """
+    Observer.
+    INTERVIEW LINE:
+        "Observer enables event-driven design."
+    """
     def update(self):
         print("Email sent")
 
 
 # --- Caller ---
 print("\n--- Observer Demo ---")
-user_service = UserService()
-user_service.subscribe(EmailObserver())
-user_service.register_user()
+service = UserService()
+service.subscribe(EmailObserver())
+service.register_user()
 
 
 # =========================================================
 # 🔟 CHAIN OF RESPONSIBILITY
 # =========================================================
 class Handler:
+    """
+    Base handler.
+    WHY:
+        Pass request through chain.
+    """
     def __init__(self, next_handler=None):
         self.next = next_handler
 
@@ -302,19 +407,27 @@ class LogHandler(Handler):
 
 # --- Caller ---
 print("\n--- Chain of Responsibility Demo ---")
-chain = AuthHandler(LogHandler())
-chain.handle("REQUEST")
+AuthHandler(LogHandler()).handle("REQUEST")
 
 
 # =========================================================
 # 1️⃣1️⃣ PROXY
 # =========================================================
 class Database:
+    """Real object"""
     def query(self):
         print("Fetching data from database")
 
 
 class DatabaseProxy:
+    """
+    Proxy.
+    WHY:
+        Control access, add caching/security.
+
+    INTERVIEW LINE:
+        "Proxy controls access to the real object."
+    """
     def __init__(self):
         self.db = Database()
 
